@@ -1,0 +1,5 @@
+tasks.db
+*.log
+/vendor/
+bin/
+build/
