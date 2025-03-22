@@ -37,7 +37,25 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
+	// params := mux.Vars(r)
+	// database.DB.Delete(&models.Task{}, params["id"])
+	// w.WriteHeader(http.StatusNoContent)
 	params := mux.Vars(r)
-	database.DB.Delete(&models.Task{}, params["id"])
-	w.WriteHeader(http.StatusNoContent)
+	var task models.Task
+
+	if err := database.DB.Unscoped().First(&task, params["id"]).Error; err != nil {
+		http.Error(w, "Task not found11", http.StatusNotFound)
+		return
+	}
+
+	if err := database.DB.Unscoped().Delete(&task).Error; err != nil {
+		http.Error(w, "Error deleting task", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Task permanently deleted from database",
+	})
+
 }
